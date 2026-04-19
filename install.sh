@@ -111,8 +111,7 @@ Next steps:
   3. A browser window will open for device auth on first agent run
 
 Config:    ${BRIDGE_DIR}/config.ini
-Logs:      ${LOG_DIR}/agent-stdio.log (raw)
-           ${LOG_DIR}/agent.log       (structured, once logging spec lands)
+Logs:      ${LOG_DIR}/agent.log
 
 EOF
 }

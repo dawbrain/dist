@@ -89,7 +89,7 @@ function Print-Done {
     Write-Host "  3. A browser window will open for device auth on first agent run"
     Write-Host ""
     Write-Host "Config:    $BridgeDir\config.ini"
-    Write-Host "Logs:      $LogDir\agent-stdio.log (raw)"
+    Write-Host "Logs:      $LogDir\agent.log"
     Write-Host ""
 }
 
