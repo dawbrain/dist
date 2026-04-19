@@ -64,7 +64,7 @@ command = $agentPath
 args =
 cwd =
 "@
-    Set-Content -Path (Join-Path $BridgeDir 'config.ini') -Value $cfg -Encoding UTF8
+    [System.IO.File]::WriteAllText((Join-Path $BridgeDir 'config.ini'), $cfg, (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function Prune-AgentVersions {
