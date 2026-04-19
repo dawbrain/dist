@@ -1,8 +1,8 @@
 # dawbrain/dist
 
-Public mirror of release artifacts from the private `dawbrain/bridge` and `dawbrain/agent` repos.
+Public mirror of release artifacts.
 
-This repo exists so the install script can fetch binaries from anonymous GitHub URLs. Source code lives in the private repos; only compiled, obfuscated, LICENSE-noticed artifacts land here.
+This repo exists so the install script can fetch binaries from anonymous GitHub URLs.
 
 ## Releases
 
