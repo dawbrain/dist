@@ -13,15 +13,38 @@ LOG_DIR="${HOME}/Library/Logs/DawBrain"
 main() {
   [[ "$(uname -s)" == "Darwin" ]] || { echo "ERROR: install.sh is for macOS. Use install.ps1 on Windows." >&2; exit 1; }
   check_ableton_user_lib
-  local bridge_tag agent_tag
+  local bridge_tag agent_tag bridge_current agent_current
   bridge_tag=$(latest_tag "bridge-")
   agent_tag=$(latest_tag "agent-")
+  bridge_current=$(installed_tag "${BRIDGE_DIR}/.version")
+  agent_current=$(installed_tag "${AGENT_DIR}/.version")
+
+  if [[ "$bridge_current" == "$bridge_tag" && "$agent_current" == "$agent_tag" ]]; then
+    echo "Already up to date (bridge ${bridge_tag}, agent ${agent_tag})."
+    exit 0
+  fi
+
   echo "Installing bridge ${bridge_tag} + agent ${agent_tag}..."
-  install_bridge "$bridge_tag"
-  install_agent "$agent_tag"
+  if [[ "$bridge_current" == "$bridge_tag" ]]; then
+    echo "  bridge already at ${bridge_tag}, skipping"
+  else
+    install_bridge "$bridge_tag"
+  fi
+  if [[ "$agent_current" == "$agent_tag" ]]; then
+    echo "  agent already at ${agent_tag}, skipping"
+  else
+    install_agent "$agent_tag"
+  fi
   write_config
   prune_agent_versions
   print_done
+}
+
+installed_tag() {
+  # $1 = path to .version file. Prints the recorded tag or empty.
+  local marker="$1"
+  [[ -f "$marker" ]] || { echo ""; return; }
+  tr -d '[:space:]' < "$marker"
 }
 
 check_ableton_user_lib() {
@@ -56,6 +79,7 @@ install_bridge() {
     "https://github.com/${DIST_REPO}/releases/download/${tag}/dawbrain-bridge.pyc"
   curl -fsSL -o "${BRIDGE_DIR}/LICENSE" \
     "https://github.com/${DIST_REPO}/releases/download/${tag}/LICENSE"
+  printf '%s' "$tag" > "${BRIDGE_DIR}/.version"
 }
 
 install_agent() {
@@ -74,6 +98,7 @@ install_agent() {
   cp "${tmp}/extract/LICENSE" "${AGENT_DIR}/LICENSE"
   rm -rf "$tmp"
   echo "${AGENT_DIR}/agent-${version}" > "${AGENT_DIR}/.last_installed"
+  printf '%s' "$tag" > "${AGENT_DIR}/.version"
 }
 
 write_config() {
