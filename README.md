@@ -16,9 +16,9 @@ Windows (PowerShell):
 
 ## What gets installed
 
-- Bridge (Ableton Remote Script) → `<Ableton User Library>/Remote Scripts/DawBrain/`
-- Agent binary → `~/Library/Application Support/DawBrain/` (macOS) / `%LOCALAPPDATA%\DawBrain\` (Windows)
-- Logs → `~/Library/Logs/DawBrain/` (macOS) / `%LOCALAPPDATA%\DawBrain\logs\` (Windows)
+- Bridge (Ableton Remote Script) → `<Ableton User Library>/Remote Scripts/Dawbrain/`
+- Agent binary → `~/Library/Application Support/Dawbrain/` (macOS) / `%LOCALAPPDATA%\Dawbrain\` (Windows)
+- Logs → `~/Library/Logs/Dawbrain/` (macOS) / `%LOCALAPPDATA%\Dawbrain\logs\` (Windows)
 
 Idempotent — safe to re-run to upgrade.
 

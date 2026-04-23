@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# DawBrain installer for macOS.
+# Dawbrain installer for macOS.
 # Usage: curl -fsSL https://raw.githubusercontent.com/dawbrain/dist/main/install.sh | bash
 set -euo pipefail
 
 DIST_REPO="dawbrain/dist"
 GH_API="https://api.github.com/repos/${DIST_REPO}/releases"
 ABLETON_USER_LIB="${HOME}/Music/Ableton/User Library"
-BRIDGE_DIR="${ABLETON_USER_LIB}/Remote Scripts/DawBrain"
-AGENT_DIR="${HOME}/Library/Application Support/DawBrain"
-LOG_DIR="${HOME}/Library/Logs/DawBrain"
+BRIDGE_DIR="${ABLETON_USER_LIB}/Remote Scripts/Dawbrain"
+AGENT_DIR="${HOME}/Library/Application Support/Dawbrain"
+LOG_DIR="${HOME}/Library/Logs/Dawbrain"
 
 main() {
   [[ "$(uname -s)" == "Darwin" ]] || { echo "ERROR: install.sh is for macOS. Use install.ps1 on Windows." >&2; exit 1; }
@@ -128,11 +128,11 @@ prune_agent_versions() {
 print_done() {
   cat <<EOF
 
-DawBrain installed successfully.
+Dawbrain installed successfully.
 
 Next steps:
   1. Open Ableton Live
-  2. Preferences → Link, Tempo & MIDI → Control Surface → DawBrain
+  2. Preferences → Link, Tempo & MIDI → Control Surface → Dawbrain
   3. A browser window will open for device auth on first agent run
 
 Config:    ${BRIDGE_DIR}/config.ini

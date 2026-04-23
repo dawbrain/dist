@@ -1,4 +1,4 @@
-# DawBrain installer for Windows.
+# Dawbrain installer for Windows.
 # Usage: iwr https://raw.githubusercontent.com/dawbrain/dist/main/install.ps1 | iex
 
 $ErrorActionPreference = 'Stop'
@@ -6,9 +6,9 @@ $ErrorActionPreference = 'Stop'
 $DistRepo        = 'dawbrain/dist'
 $GhApi           = "https://api.github.com/repos/$DistRepo/releases"
 $AbletonUserLib  = Join-Path $env:USERPROFILE 'Documents\Ableton\User Library'
-$BridgeDir       = Join-Path $AbletonUserLib 'Remote Scripts\DawBrain'
-$AgentDir        = Join-Path $env:LOCALAPPDATA 'DawBrain'
-$LogDir          = Join-Path $env:LOCALAPPDATA 'DawBrain\logs'
+$BridgeDir       = Join-Path $AbletonUserLib 'Remote Scripts\Dawbrain'
+$AgentDir        = Join-Path $env:LOCALAPPDATA 'Dawbrain'
+$LogDir          = Join-Path $env:LOCALAPPDATA 'Dawbrain\logs'
 
 function Main {
     Check-AbletonUserLib
@@ -104,11 +104,11 @@ function Prune-AgentVersions {
 
 function Print-Done {
     Write-Host ""
-    Write-Host "DawBrain installed successfully."
+    Write-Host "Dawbrain installed successfully."
     Write-Host ""
     Write-Host "Next steps:"
     Write-Host "  1. Open Ableton Live"
-    Write-Host "  2. Preferences -> Link, Tempo & MIDI -> Control Surface -> DawBrain"
+    Write-Host "  2. Preferences -> Link, Tempo & MIDI -> Control Surface -> Dawbrain"
     Write-Host "  3. A browser window will open for device auth on first agent run"
     Write-Host ""
     Write-Host "Config:    $BridgeDir\config.ini"
