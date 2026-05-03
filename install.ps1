@@ -50,8 +50,15 @@ function Check-AbletonUserLib {
 }
 
 function Get-LatestTag([string]$prefix) {
+    # Sort by published_at desc — the GitHub releases API doesn't guarantee
+    # any particular order when releases share a created_at (which all of
+    # ours do, since they were imported as a batch). Without the sort,
+    # First 1 would return e.g. v0.1.9 even when v0.1.10 exists.
     $releases = Invoke-RestMethod -Uri $GhApi
-    $match = $releases | Where-Object { $_.tag_name.StartsWith($prefix) } | Select-Object -First 1
+    $match = $releases `
+        | Where-Object { $_.tag_name.StartsWith($prefix) } `
+        | Sort-Object -Property { [datetime]$_.published_at } -Descending `
+        | Select-Object -First 1
     if (-not $match) { Write-Error "No release found with prefix $prefix" }
     return $match.tag_name
 }
