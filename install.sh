@@ -58,6 +58,10 @@ check_ableton_user_lib() {
 
 latest_tag() {
   # $1 = prefix, e.g. "bridge-"
+  # Sort by published_at desc — the GitHub releases API doesn't guarantee
+  # any particular order when releases share a created_at (which all of
+  # ours do, since they were imported as a batch). Without the sort, the
+  # first match would be e.g. v0.1.9 even when v0.1.10 exists.
   local prefix="$1"
   curl -fsSL "$GH_API" | python3 -c "
 import json, sys
@@ -66,7 +70,7 @@ matches = [r for r in releases if r['tag_name'].startswith('$prefix')]
 if not matches:
     sys.stderr.write('ERROR: no release found with prefix $prefix\n')
     sys.exit(1)
-# releases are returned newest-first by the API
+matches.sort(key=lambda r: r['published_at'], reverse=True)
 print(matches[0]['tag_name'])
 "
 }
