@@ -11,6 +11,7 @@ $AgentDir        = Join-Path $env:LOCALAPPDATA 'Dawbrain'
 $LogDir          = Join-Path $env:LOCALAPPDATA 'Dawbrain\logs'
 
 function Main {
+    Print-Title
     Check-AbletonUserLib
     $bridgeTag = Get-LatestTag 'bridge-'
     $agentTag  = Get-LatestTag 'agent-'
@@ -107,6 +108,17 @@ function Prune-AgentVersions {
           try { Remove-Item $_.FullName -Force -ErrorAction Stop }
           catch { Write-Warning "could not delete $($_.Name) (likely in use) — will retry next install" }
       }
+}
+
+function Print-Title {
+    Write-Host @'
+ ____                 _               _
+|  _ \  __ ___      _| |__  _ __ __ _(_)_ __
+| | | |/ _` \ \ /\ / / '_ \| '__/ _` | | '_ \
+| |_| | (_| |\ V  V /| |_) | | | (_| | | | | |
+|____/ \__,_| \_/\_/ |_.__/|_|  \__,_|_|_| |_|
+'@
+    Write-Host ""
 }
 
 function Print-Done {
