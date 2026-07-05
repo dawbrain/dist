@@ -11,6 +11,7 @@ AGENT_DIR="${HOME}/Library/Application Support/Dawbrain"
 LOG_DIR="${HOME}/Library/Logs/Dawbrain"
 
 main() {
+  print_title
   [[ "$(uname -s)" == "Darwin" ]] || { echo "ERROR: install.sh is for macOS. Use install.ps1 on Windows." >&2; exit 1; }
   check_ableton_user_lib
   local bridge_tag agent_tag bridge_current agent_current
@@ -127,6 +128,17 @@ prune_agent_versions() {
         echo "  pruning $(basename "$old")"
         rm -f "$old"
       done
+}
+
+print_title() {
+  cat <<'EOF'
+ ____                 _               _
+|  _ \  __ ___      _| |__  _ __ __ _(_)_ __
+| | | |/ _` \ \ /\ / / '_ \| '__/ _` | | '_ \
+| |_| | (_| |\ V  V /| |_) | | | (_| | | | | |
+|____/ \__,_| \_/\_/ |_.__/|_|  \__,_|_|_| |_|
+
+EOF
 }
 
 print_done() {
