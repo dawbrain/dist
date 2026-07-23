@@ -59,21 +59,49 @@ check_ableton_user_lib() {
 
 latest_tag() {
   # $1 = prefix, e.g. "bridge-"
-  # Sort by published_at desc — the GitHub releases API doesn't guarantee
-  # any particular order when releases share a created_at (which all of
-  # ours do, since they were imported as a batch). Without the sort, the
-  # first match would be e.g. v0.1.9 even when v0.1.10 exists.
-  local prefix="$1"
-  curl -fsSL "$GH_API" | python3 -c "
-import json, sys
-releases = json.load(sys.stdin)
-matches = [r for r in releases if r['tag_name'].startswith('$prefix')]
-if not matches:
-    sys.stderr.write('ERROR: no release found with prefix $prefix\n')
-    sys.exit(1)
-matches.sort(key=lambda r: r['published_at'], reverse=True)
-print(matches[0]['tag_name'])
+  #
+  # Walks every page of the releases API, not just the first. The default page
+  # holds 30 releases, and each component's tags can occupy all of them, which
+  # left the other component's newest release outside the response entirely and
+  # failed the lookup even though the release existed.
+  #
+  local prefix="$1" page=1 tags="" body page_tags count latest
+
+  while [ "$page" -le 20 ]; do
+    if ! body=$(curl -fsSL -H 'Accept: application/vnd.github+json' \
+        "${GH_API}?per_page=100&page=${page}"); then
+      echo "ERROR: could not reach the releases API" >&2
+      return 1
+    fi
+    page_tags=$(printf '%s' "$body" \
+      | grep -o '"tag_name"[[:space:]]*:[[:space:]]*"[^"]*"' \
+      | sed 's/.*"\([^"]*\)"$/\1/' || true)
+    if [ -z "$page_tags" ]; then
+      break
+    fi
+    tags="${tags}${page_tags}
 "
+    count=$(printf '%s\n' "$page_tags" | grep -c . || true)
+    if [ "$count" -lt 100 ]; then
+      break
+    fi
+    page=$((page + 1))
+  done
+
+  # Highest version wins, not most recently published: a numeric sort over
+  # MAJOR.MINOR.PATCH doesn't care what order the API returned releases in,
+  # and a plain lexical sort would pick v0.1.9 over v0.1.10.
+  latest=$(printf '%s' "$tags" \
+    | grep "^${prefix}v" \
+    | sed "s/^${prefix}v//" \
+    | sort -t. -k1,1n -k2,2n -k3,3n \
+    | tail -n 1 || true)
+
+  if [ -z "$latest" ]; then
+    echo "ERROR: no release found with prefix ${prefix}" >&2
+    return 1
+  fi
+  printf '%sv%s\n' "$prefix" "$latest"
 }
 
 install_bridge() {
@@ -118,15 +146,33 @@ EOF
 }
 
 prune_agent_versions() {
-  # Keep the 2 most-recent agent-* files; delete older.
-  # Sorting by mtime descending.
-  local keep=2
-  find "$AGENT_DIR" -maxdepth 1 -type f -name 'agent-*' -print0 \
-    | xargs -0 ls -t \
+  # Keep the 2 highest-versioned agent-* files; delete the rest. Ordering by
+  # version rather than mtime matches how latest_tag picks a release, so a
+  # reinstall that touches an old file can't make it look current.
+  #
+  # Deliberately not `find ... | xargs ls -t`: with no matches, xargs can still
+  # run `ls -t` with no arguments, which lists the CURRENT DIRECTORY, and those
+  # names then reach rm. For a `curl | bash` install that is wherever the user
+  # happened to be standing. Globbing in the target directory can't wander.
+  # Only bare version strings cross the pipe, never paths: AGENT_DIR contains a
+  # space ("Application Support"), so piping filenames would word-split.
+  local keep=2 files=() version old
+  shopt -s nullglob
+  files=( "${AGENT_DIR}"/agent-* )
+  shopt -u nullglob
+  if [ "${#files[@]}" -le "$keep" ]; then
+    return 0
+  fi
+  printf '%s\n' "${files[@]}" \
+    | sed 's|.*/agent-||' \
+    | sort -t. -k1,1nr -k2,2nr -k3,3nr \
     | tail -n +$((keep + 1)) \
-    | while read -r old; do
-        echo "  pruning $(basename "$old")"
-        rm -f "$old"
+    | while IFS= read -r version; do
+        old="${AGENT_DIR}/agent-${version}"
+        if [ -f "$old" ]; then
+          echo "  pruning $(basename "$old")"
+          rm -f -- "$old"
+        fi
       done
 }
 
