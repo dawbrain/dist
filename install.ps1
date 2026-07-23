@@ -51,15 +51,29 @@ function Check-AbletonUserLib {
 }
 
 function Get-LatestTag([string]$prefix) {
-    # Sort by published_at desc — the GitHub releases API doesn't guarantee
-    # any particular order when releases share a created_at (which all of
-    # ours do, since they were imported as a batch). Without the sort,
-    # First 1 would return e.g. v0.1.9 even when v0.1.10 exists.
-    $releases = Invoke-RestMethod -Uri $GhApi
-    $match = $releases `
-        | Where-Object { $_.tag_name.StartsWith($prefix) } `
-        | Sort-Object -Property { [datetime]$_.published_at } -Descending `
-        | Select-Object -First 1
+    # Walks every page of the releases API, not just the first. The default page
+    # holds 30 releases, and each component's tags can occupy all of them, which
+    # left the other component's newest release outside the response entirely
+    # and failed the lookup even though the release existed.
+    #
+    # Highest version wins, not most recently published: sorting on the numeric
+    # MAJOR.MINOR.PATCH doesn't care what order the API returned releases in,
+    # and a plain string sort would pick v0.1.9 over v0.1.10. Kept identical to
+    # install.sh so both installers resolve the same release.
+    $candidates = @()
+    for ($page = 1; $page -le 20; $page++) {
+        $releases = @(Invoke-RestMethod -Uri "${GhApi}?per_page=100&page=$page")
+        if ($releases.Count -eq 0) { break }
+        $candidates += $releases | Where-Object { $_.tag_name.StartsWith($prefix) }
+        if ($releases.Count -lt 100) { break }
+    }
+    $match = $candidates `
+        | Where-Object { $_.tag_name -match "^$prefix" + 'v(\d+)\.(\d+)\.(\d+)$' } `
+        | Sort-Object `
+            @{ Expression = { [int]($_.tag_name -replace "^${prefix}v(\d+)\.(\d+)\.(\d+)$", '$1') } }, `
+            @{ Expression = { [int]($_.tag_name -replace "^${prefix}v(\d+)\.(\d+)\.(\d+)$", '$2') } }, `
+            @{ Expression = { [int]($_.tag_name -replace "^${prefix}v(\d+)\.(\d+)\.(\d+)$", '$3') } } `
+        | Select-Object -Last 1
     if (-not $match) { Write-Error "No release found with prefix $prefix" }
     return $match.tag_name
 }
