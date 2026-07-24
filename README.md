@@ -1,6 +1,6 @@
-# dawbrain/dist
+# Dawbrain
 
-Public mirror of release artifacts.
+Public mirror of release artifacts of Dawbrain Agent. For more information, see https://www.dawbrain.com
 
 This repo exists so the install script can fetch binaries from anonymous GitHub URLs.
 
