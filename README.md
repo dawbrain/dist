@@ -16,11 +16,22 @@ Windows (PowerShell):
 
 ## What gets installed
 
-- Bridge (Ableton Remote Script) → `<Ableton User Library>/Remote Scripts/Dawbrain/`
-- Agent binary → `~/Library/Application Support/Dawbrain/` (macOS) / `%LOCALAPPDATA%\Dawbrain\` (Windows)
-- Logs → `~/Library/Logs/Dawbrain/` (macOS) / `%LOCALAPPDATA%\Dawbrain\logs\` (Windows)
+- Bridge (Ableton Remote Script), into your Ableton User Library
+- Agent, into your user application data folder
 
-Idempotent — safe to re-run to upgrade.
+Safe to re-run to upgrade.
+
+## Uninstall
+
+Quit Ableton Live first.
+
+macOS:
+
+    curl -fsSL https://raw.githubusercontent.com/dawbrain/dist/main/uninstall.sh | bash
+
+Windows (PowerShell):
+
+    iwr https://raw.githubusercontent.com/dawbrain/dist/main/uninstall.ps1 | iex
 
 ## Releases
 
